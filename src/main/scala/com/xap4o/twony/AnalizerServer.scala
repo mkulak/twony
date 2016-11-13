@@ -8,7 +8,7 @@ import com.xap4o.twony.AkkaStuff._
 
 import scala.concurrent.Future
 
-class AnalizerServer extends StrictLogging {
+class AnalizerServer(config: AppConfig) extends StrictLogging {
   val route =
     path("/") {
       get {
@@ -17,8 +17,8 @@ class AnalizerServer extends StrictLogging {
     }
 
   def start(): Future[ServerBinding] = {
-    Http().bindAndHandle(route, "localhost", 8080).map {s =>
-      LOG.info(s"Server started at http://localhost:8080")
+    Http().bindAndHandle(route, config.host, config.port).map {s =>
+      LOG.info(s"Server started at http://${config.host}:${config.port}")
       s
     }
   }
