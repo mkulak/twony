@@ -12,15 +12,13 @@ object App extends StrictLogging {
     val config = AppConfig.load()
 
     val client = new TwitterClient(config)
-    client.open().map { token =>
-      println(token)
-    }
+    client.open()
 
     val server = new AnalizerServer(config)
     val future: Future[ServerBinding] = server.start()
-    future.flatMap(_.unbind()).onComplete(_ => system.terminate())
     LOG.info("Press Enter to terminate")
     StdIn.readLine()
+    future.flatMap(_.unbind()).onComplete(_ => system.terminate())
   }
 }
 

@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 
 object AkkaStuff {
-  implicit val system = ActorSystem("my-system")
+  implicit val system = ActorSystem("main")
   implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+  implicit val executionContext = scala.concurrent.ExecutionContext.global
 }
