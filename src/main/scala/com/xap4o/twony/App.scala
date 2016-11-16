@@ -12,7 +12,7 @@ object App extends StrictLogging {
     val config = AppConfig.load()
 
     val client = new TwitterClient(config)
-    client.open()
+    client.open().flatMap(t => client.getTweets(t, "trump"))
 
     val server = new AnalizerServer(config)
     val future: Future[ServerBinding] = server.start()
