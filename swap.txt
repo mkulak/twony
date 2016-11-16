@@ -2,7 +2,8 @@
 22:15:51.349 INFO  c.x.twony.App$ - Press Enter to terminate
 22:15:51.661 INFO  c.x.t.AnalizerServer - Server started at http://localhost:8080
 22:15:53.855 INFO  c.x.t.TwitterClient - received token: AAAAAAAAAAAAAAAAAAAAABgwxwAAAAAAubrPCusIihZN3aTQyoCdKOfq%2Bss%3DTWSmSuCldZT2fH3XMkDN91Z5ZhvVsAC3IIInYYfqZgsYqIvqQH
-22:15:54.552 INFO  c.x.t.TwitterClient - received: {
+22:15:54.552 INFO  c.x.t.TwitterClient - received:
+{
   "statuses": [{
     "coordinates": null,
     "retweeted": false,
