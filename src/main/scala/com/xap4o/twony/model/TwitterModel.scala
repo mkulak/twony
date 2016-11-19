@@ -14,7 +14,7 @@ object TwitterModel extends SprayJsonSupport with json.DefaultJsonProtocol {
   case class AuthError(message: String, t: Throwable) extends Error
 
   case class AuthResponse(tokenType: String, accessToken: String)
-  case class SearchResponse(statuses: Seq[Tweet], metadata: SearchMetadata)
+  case class SearchResponse(tweets: Seq[Tweet], metadata: SearchMetadata)
   case class SearchMetadata(count: Int, query: String)
   case class Tweet(text: String, username: String)
 
@@ -64,7 +64,7 @@ object TwitterModel extends SprayJsonSupport with json.DefaultJsonProtocol {
 
   implicit object SearchResponseJsonFormat extends RootJsonFormat[SearchResponse] {
     def write(t: SearchResponse) =
-      JsObject("statuses" -> JsArray(t.statuses.map(_.toJson).toVector), "metadata" -> t.metadata.toJson)
+      JsObject("statuses" -> JsArray(t.tweets.map(_.toJson).toVector), "metadata" -> t.metadata.toJson)
 
     def read(value: JsValue) = value match {
       case JsObject(values) =>
@@ -75,8 +75,6 @@ object TwitterModel extends SprayJsonSupport with json.DefaultJsonProtocol {
       case _ => deserializationError(s"bad data $value")
     }
   }
-
-
 
 
   implicit class EncodableString(val s: String) extends AnyVal {
