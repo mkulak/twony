@@ -1,48 +1,31 @@
 package com.xap4o.twony
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest}
 import akka.http.scaladsl.server.Directives._
-import com.xap4o.twony.AkkaStuff._
-import com.xap4o.twony.model.TwitterModel.Tweet
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
 import spray.json.BasicFormats
 
 import scala.concurrent.Future
 import scala.io.StdIn
-import scala.util.{Failure, Success, Try}
 
 object App extends StrictLogging with BasicFormats {
+  implicit val system = ActorSystem("main")
+  implicit val materializer = ActorMaterializer()
+  implicit val executionContext = scala.concurrent.ExecutionContext.global
+
   def main(args: Array[String]): Unit = {
     val config = AppConfig.load()
+    new PeriodicProcessing(config).start()
+    startServerAndBlock(config, AnalizerServer.route ~ StaticServer.route)
+  }
 
-    val client = new TwitterClient(config)
-    val futures = client.open().flatMap(token => client.search(token, "trump"))
-      .flatMap(result => Future.sequence(result.tweets.map(tweet => analyze(tweet))))
-
-    futures.foreach { results =>
-      val success = results.collect {case Success(result) => result}
-      val (positive, negative) = success.partition(identity)
-      LOG.info(s"received: ${results.size} results. Positive ${positive.size}, " +
-        s"negative: ${negative.size}, fails: ${results.size - success.size}")
-    }
-
-    val future: Future[ServerBinding] = HttpUtils.startServer(config.http, AnalizerServer.route ~ StaticServer.route)
+  def startServerAndBlock(config: AppConfig, route: Route): Unit = {
+    val future: Future[ServerBinding] = HttpUtils.startServer(config.http, route)
     LOG.info("Press Enter to terminate")
     StdIn.readLine()
     future.flatMap(_.unbind()).onComplete(_ => system.terminate())
-  }
-
-  def analyze(tweet: Tweet): Future[Try[Boolean]] = {
-    val req: HttpRequest = HttpRequest()
-      .withUri("http://localhost:8080/analyze")
-      .withMethod(HttpMethods.POST)
-      .withEntity(HttpEntity(ContentTypes.`application/json`, tweet.toJson.compactPrint))
-
-    HttpUtils.getJson(req).map(_.convertTo[Boolean]).toTry
-  }
-
-  implicit class TryFuture[T](f: Future[T]) {
-    def toTry: Future[Try[T]] = f.map(Success(_)).recover{ case x => Failure(x) }
   }
 }
 
