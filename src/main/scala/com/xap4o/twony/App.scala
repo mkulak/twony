@@ -2,6 +2,7 @@ package com.xap4o.twony
 
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest}
+import akka.http.scaladsl.server.Directives._
 import com.xap4o.twony.AkkaStuff._
 import com.xap4o.twony.model.TwitterModel.Tweet
 import spray.json.BasicFormats
@@ -24,9 +25,8 @@ object App extends StrictLogging with BasicFormats {
       LOG.info(s"received: ${results.size} results. Positive ${positive.size}, " +
         s"negative: ${negative.size}, fails: ${results.size - success.size}")
     }
-//        LOG.info(s"${response.tweets.map(t => "@" + t.username + ": " + t.text).mkString("\n")}")
-    val server = new AnalizerServer(config)
-    val future: Future[ServerBinding] = server.start()
+
+    val future: Future[ServerBinding] = HttpUtils.startServer(config.http, AnalizerServer.route ~ StaticServer.route)
     LOG.info("Press Enter to terminate")
     StdIn.readLine()
     future.flatMap(_.unbind()).onComplete(_ => system.terminate())
