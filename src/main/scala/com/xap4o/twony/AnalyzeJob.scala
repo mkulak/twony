@@ -13,19 +13,19 @@ import scala.util.{Failure, Success, Try}
 class AnalyzeJob(config: AppConfig)(
   implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging with json.DefaultJsonProtocol {
 
-  def process(query: String): Unit = {
+  def process(query: String): Future[AnalyzeResult] = {
     val client = new TwitterClient(config)
-    val futures = client
+    val timer = new Timer
+    client
       .open()
       .flatMap(token => client.search(token, query))
       .flatMap(result => Future.sequence(result.tweets.map(analyze)))
-
-    futures.foreach { results =>
-      val success = results.collect {case Success(result) => result}
-      val (positive, negative) = success.partition(identity)
-      LOG.info(s"received: ${results.size} results. Positive ${positive.size}, " +
-        s"negative: ${negative.size}, fails: ${results.size - success.size}")
-    }
+      .map { results =>
+        val success = results.collect {case Success(result) => result}
+        val positiveCount = success.count(identity)
+        val negativeCount = success.size - positiveCount
+        AnalyzeResult(results.size, positiveCount, negativeCount, results.size - success.size, timer.duration())
+      }
   }
 
   def analyze(tweet: Tweet): Future[Try[Boolean]] = {
@@ -41,3 +41,5 @@ class AnalyzeJob(config: AppConfig)(
     def toTry: Future[Try[T]] = f.map(Success(_)).recover{ case x => Failure(x) }
   }
 }
+
+case class AnalyzeResult(total: Int, positive: Int, negative: Int, errors: Int, duration: Long)

@@ -5,6 +5,8 @@ import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
+import com.xap4o.twony.db.{AnalyzeResultDb, Db}
+import slick.jdbc.JdbcBackend._
 import spray.json.BasicFormats
 
 import scala.concurrent.Future
@@ -17,7 +19,12 @@ object App extends StrictLogging with BasicFormats {
 
   def main(args: Array[String]): Unit = {
     val config = AppConfig.load()
-    new PeriodicProcessing(config).start()
+    Db.init(config.db)
+
+    val db = Database.forConfig("", config.db.fullConfig)
+    val resultsDb = new AnalyzeResultDb(db)
+
+    new PeriodicProcessing(config, resultsDb).start()
     startServerAndBlock(config, AnalizerServer.route ~ StaticServer.route)
   }
 
