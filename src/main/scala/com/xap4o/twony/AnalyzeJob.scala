@@ -3,6 +3,7 @@ package com.xap4o.twony
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest}
 import akka.stream.Materializer
+import com.xap4o.twony.http.HttpUtils
 import com.xap4o.twony.model.TwitterModel.Tweet
 import spray.json
 import spray.json._
@@ -19,12 +20,15 @@ class AnalyzeJob(config: AppConfig)(
     client
       .open()
       .flatMap(token => client.search(token, query))
-      .flatMap(result => Future.sequence(result.tweets.map(analyze)))
-      .map { results =>
-        val success = results.collect {case Success(result) => result}
-        val positiveCount = success.count(identity)
-        val negativeCount = success.size - positiveCount
-        AnalyzeResult(results.size, positiveCount, negativeCount, results.size - success.size, timer.duration())
+      .flatMap { searchResult =>
+        Future.sequence(searchResult.tweets.map(analyze)).map { results =>
+          val success = results.collect {case Success(result) => result}
+          val positiveCount = success.count(identity)
+          val negativeCount = success.size - positiveCount
+          val errorsCount = results.size - success.size
+          val duration = timer.duration()
+          AnalyzeResult(searchResult.metadata.query, results.size, positiveCount, negativeCount, errorsCount, duration)
+        }
       }
   }
 
@@ -42,4 +46,4 @@ class AnalyzeJob(config: AppConfig)(
   }
 }
 
-case class AnalyzeResult(total: Int, positive: Int, negative: Int, errors: Int, duration: Long)
+case class AnalyzeResult(query: String, total: Int, positive: Int, negative: Int, errors: Int, duration: Long)

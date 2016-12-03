@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
 import akka.stream.Materializer
+import com.xap4o.twony.http.HttpUtils
 import com.xap4o.twony.model.TwitterModel.{AuthResponse, SearchResponse}
 
 import scala.concurrent.{ExecutionContext, Future}

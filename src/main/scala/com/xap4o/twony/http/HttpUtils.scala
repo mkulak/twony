@@ -1,4 +1,4 @@
-package com.xap4o.twony
+package com.xap4o.twony.http
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -6,6 +6,7 @@ import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model.{HttpCharsets, HttpEntity, HttpRequest}
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
+import com.xap4o.twony.{HttpConfig, StrictLogging}
 import spray.json.{JsValue, _}
 
 import scala.concurrent.duration._

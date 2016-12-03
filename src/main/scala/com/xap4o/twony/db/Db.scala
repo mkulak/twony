@@ -19,7 +19,22 @@ class AnalyzeResultDb(db: DatabaseDef)(implicit ec: ExecutionContext) {
   def persist(r: AnalyzeResult): Future[Int] = {
     db.run(
       sqlu"""insert into analyze_result(total, positive, negative, errors, duration)
-             values (${r.total}, ${r.positive}, ${r.negative}, ${r.errors}, ${r.duration}) """)
+             values (${r.total}, ${r.positive}, ${r.negative}, ${r.errors}, ${r.duration})""")
   }
+}
+
+class SearchKeywordsDb(db: DatabaseDef)(implicit ec: ExecutionContext) {
+  def getAll(): Future[Seq[String]] = {
+    db.run(sql"""select * from search_keywords order by id""".as[String])
+  }
+
+  def persist(keyword: String): Future[Int] = {
+    db.run(sqlu"""insert into search_keywords(value) values ($keyword)""")
+  }
+
+  def delete(keyword: String): Future[Int] = {
+    db.run(sqlu"""delete from search_keywords where value=$keyword""")
+  }
+
 }
 

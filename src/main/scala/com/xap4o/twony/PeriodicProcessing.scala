@@ -2,12 +2,12 @@ package com.xap4o.twony
 
 import akka.actor.{ActorSystem, Cancellable}
 import akka.stream.Materializer
-import com.xap4o.twony.db.AnalyzeResultDb
+import com.xap4o.twony.db.{AnalyzeResultDb, SearchKeywordsDb}
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
-class PeriodicProcessing(config: AppConfig, resultDb: AnalyzeResultDb)(
+class PeriodicProcessing(config: AppConfig, resultDb: AnalyzeResultDb, keywordsDb: SearchKeywordsDb)(
   implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging {
 
   def start(): Cancellable = {
@@ -18,11 +18,13 @@ class PeriodicProcessing(config: AppConfig, resultDb: AnalyzeResultDb)(
 
   def process(): Unit = {
     val job = new AnalyzeJob(config)
-    val res = job.process("trump")
-    res.foreach { result =>
-      LOG.info(s"received: ${result.total} results. Positive ${result.positive}, " +
-        s"negative: ${result.negative}, fails: ${result.errors}")
-      resultDb.persist(result)
+    val res = keywordsDb.getAll().flatMap(keywords => Future.sequence(keywords.map(keyword => job.process(keyword))))
+    res.foreach { results =>
+      results.foreach { result =>
+        LOG.info(s"Query: '${result.query}' - ${result.total} results. Positive ${result.positive}, " +
+          s"negative: ${result.negative}, fails: ${result.errors}")
+        resultDb.persist(result)
+      }
     }
   }
 }

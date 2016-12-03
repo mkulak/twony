@@ -1,10 +1,18 @@
-create table analyze_result (
-  id serial,
-  total int not null,
-  positive int not null,
-  negative int not null,
-  errors int not null,
-  duration int not null,
+CREATE TABLE analyze_result (
+  id SERIAL,
+  total INT NOT NULL,
+  positive INT NOT NULL,
+  negative INT NOT NULL,
+  errors INT NOT NULL,
+  duration INT NOT NULL,
 
   PRIMARY KEY(id)
+);
+
+CREATE TABLE search_keywords (
+  id SERIAL,
+  value VARCHAR(50) NOT NULL,
+
+  PRIMARY KEY(id),
+  UNIQUE (value)
 );
