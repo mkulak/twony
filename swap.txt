@@ -10,6 +10,17 @@ rest crud api to manage search keywords list
 Test AnalyzeJob (preferrably with akka http test client
 Test KeywordsServer (CRUD)
 
+//  test("Invoking head on an empty Set should produce NoSuchElementException") {
+//    assertThrows[NoSuchElementException] {
+//      Set.empty.head
+//    }
+//  }
+
+//  "com.typesafe.akka" %% "akka-http-testkit" % akkaVersion,
+//  "com.typesafe.akka" %% "akka-http-xml-experimental" % akkaVersion
+
+//resolvers += "spray repo" at "http://repo.spray.io"
+
 //  implicit val responseFormat = jsonFormat2(AuthResponse)
 
   val route =

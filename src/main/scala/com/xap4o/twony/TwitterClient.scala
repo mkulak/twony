@@ -12,8 +12,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 
-class TwitterClient(config: AppConfig)(
-  implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging {
+trait TwitterClient {
+  def open(): Future[Token]
+  def search(token: Token, keyword: String): Future[SearchResponse]
+}
+
+class TwitterClientImpl(config: AppConfig)(
+  implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends TwitterClient with StrictLogging {
   val contentType = ContentType(MediaType.applicationWithFixedCharset("x-www-form-urlencoded", HttpCharsets.`UTF-8`))
 
   def open(): Future[Token] = {

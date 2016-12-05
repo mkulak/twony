@@ -12,8 +12,13 @@ import spray.json._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class AnalyzerClient(config: AppConfig) extends json.DefaultJsonProtocol {
-  def analyze(tweet: Tweet)(implicit ec: ExecutionContext, as: ActorSystem, m: Materializer): Future[Try[Boolean]] = {
+trait AnalyzerClient {
+  def analyze(tweet: Tweet)(implicit ec: ExecutionContext, as: ActorSystem, m: Materializer): Future[Try[Boolean]]
+}
+
+class AnalyzerClientImpl(config: AppConfig) extends AnalyzerClient with json.DefaultJsonProtocol {
+  override def analyze(tweet: Tweet)(
+    implicit ec: ExecutionContext, as: ActorSystem, m: Materializer): Future[Try[Boolean]] = {
     val req: HttpRequest = HttpRequest()
       .withUri(s"${config.processing.analyzeHost}/analyze")
       .withMethod(HttpMethods.POST)
