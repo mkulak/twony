@@ -16,3 +16,5 @@ CREATE TABLE search_keywords (
   PRIMARY KEY(id),
   UNIQUE (value)
 );
+
+INSERT INTO search_keywords(value) VALUES('trump')

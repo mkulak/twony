@@ -16,23 +16,25 @@ class TwitterClient(config: AppConfig)(
   implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging {
   val contentType = ContentType(MediaType.applicationWithFixedCharset("x-www-form-urlencoded", HttpCharsets.`UTF-8`))
 
-  def open(): Future[String] = {
+  def open(): Future[Token] = {
     val req: HttpRequest = HttpRequest()
-      .withUri("https://api.twitter.com/oauth2/token")
+      .withUri(s"${config.processing.twitterHost}/oauth2/token")
       .withMethod(HttpMethods.POST)
       .withHeaders(Authorization(BasicHttpCredentials(config.processing.twitterKey, config.processing.twitterSecret)))
       .withEntity(HttpEntity(contentType, "grant_type=client_credentials"))
 
-    HttpUtils.getJson(req, config.processing.timeout).map(_.convertTo[AuthResponse].accessToken)
+    HttpUtils.getJson(req, config.processing.timeout).map(_.convertTo[AuthResponse].accessToken).map(Token)
   }
 
-  def search(token: String, keyword: String): Future[SearchResponse] = {
+  def search(token: Token, keyword: String): Future[SearchResponse] = {
     val req: HttpRequest = HttpRequest()
-      .withUri(Uri("https://api.twitter.com/1.1/search/tweets.json").withQuery(Query("q" -> keyword)))
+      .withUri(Uri(s"${config.processing.twitterHost}/1.1/search/tweets.json").withQuery(Query("q" -> keyword)))
       .withMethod(HttpMethods.GET)
-      .withHeaders(Authorization(OAuth2BearerToken(token)))
+      .withHeaders(Authorization(OAuth2BearerToken(token.value)))
 
     HttpUtils.getJson(req, config.processing.timeout).map(_.convertTo[SearchResponse])
   }
 }
+
+case class Token(value: String)
 

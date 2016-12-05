@@ -7,6 +7,38 @@
 
 rest crud api to manage search keywords list
 
+Test AnalyzeJob (preferrably with akka http test client
+Test KeywordsServer (CRUD)
+
+//  implicit val responseFormat = jsonFormat2(AuthResponse)
+
+  val route =
+//    pathSingleSlash {
+    pathPrefix("akka") {
+      get {
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
+      }
+    } ~
+    path("analyze") {
+      post {
+        entity(as[Tweet]) { tweet =>
+          complete(HttpEntity(ContentTypes.`application/json`, (tweet.text.length % 2 == 0).toString))
+        }
+      }
+//      get {
+//        parameters('text, 'foo ?) { (text, foo) =>
+//          complete(s"text=$text foo=$foo")
+//        }
+//      }
+//      get {
+//        parameters(('text.as[String], 'color ?, 'dangerous ? "no")).as[Tweet] { orderItem =>
+//          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
+//        }
+//      }
+      // ~
+    }
+
+
 22:15:51.349 INFO  c.x.twony.App$ - Press Enter to terminate
 22:15:51.661 INFO  c.x.t.AnalizerServer - Server started at http://localhost:8080
 22:15:53.855 INFO  c.x.t.TwitterClient - received token: AAAAAAAAAAAAAAAAAAAAABgwxwAAAAAAubrPCusIihZN3aTQyoCdKOfq%2Bss%3DTWSmSuCldZT2fH3XMkDN91Z5ZhvVsAC3IIInYYfqZgsYqIvqQH

@@ -8,7 +8,14 @@ case class AppConfig(http: HttpConfig, processing: ProcessingConfig, db: DbConfi
 case class HttpConfig(host: String, port: Int)
 case class DbConfig(url: String, user: String, password: String, fullConfig: Config)
 
-case class ProcessingConfig(interval: FiniteDuration, twitterKey: String, twitterSecret: String, timeout: FiniteDuration)
+case class ProcessingConfig(
+  interval: FiniteDuration, 
+  twitterHost: String, 
+  twitterKey: String, 
+  twitterSecret: String, 
+  timeout: FiniteDuration,
+  analyzeHost: String
+)
 
 object AppConfig {
   implicit def asFiniteDuration(d: java.time.Duration): FiniteDuration =
@@ -26,9 +33,11 @@ object AppConfig {
       ),
       ProcessingConfig(
         proc getDuration "interval",
+        proc getString "twitterHost",
         proc getString "twitterKey",
         proc getString "twitterSecret",
-        proc getDuration "timeout"
+        proc getDuration "timeout",
+        proc getString "analyzeHost"
       ),
       DbConfig(
         db getString "url",

@@ -25,8 +25,11 @@ object App extends StrictLogging with BasicFormats {
     val db = Database.forConfig("", config.db.fullConfig)
     val resultsDb = new AnalyzeResultDb(db)
     val keywordsDb = new SearchKeywordsDb(db)
+    val twitterClient = new TwitterClient(config)
+    val analyzerClient = new AnalyzerClient(config)
 
-    new PeriodicProcessing(config, resultsDb, keywordsDb).start()
+    new PeriodicProcessing(config, twitterClient, analyzerClient, resultsDb, keywordsDb).start()
+
     val keywordsServer = new KeywordsServer(keywordsDb)
     startServerAndBlock(config, AnalizerServer.route ~ StaticServer.route ~ keywordsServer.route)
   }

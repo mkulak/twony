@@ -25,7 +25,7 @@ class AnalyzeResultDb(db: DatabaseDef)(implicit ec: ExecutionContext) {
 
 class SearchKeywordsDb(db: DatabaseDef)(implicit ec: ExecutionContext) {
   def getAll(): Future[Seq[String]] = {
-    db.run(sql"""select * from search_keywords order by id""".as[String])
+    db.run(sql"""select value from search_keywords order by id""".as[String])
   }
 
   def persist(keyword: String): Future[Int] = {

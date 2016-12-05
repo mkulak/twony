@@ -5,7 +5,6 @@ import com.xap4o.twony.StrictLogging
 
 object StaticServer extends StrictLogging {
   val route =
-//    pathSingleSlash {
     pathPrefix("site") {
       encodeResponse {
         getFromResourceDirectory("webapp")

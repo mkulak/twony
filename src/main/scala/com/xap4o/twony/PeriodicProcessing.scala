@@ -7,8 +7,13 @@ import com.xap4o.twony.db.{AnalyzeResultDb, SearchKeywordsDb}
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class PeriodicProcessing(config: AppConfig, resultDb: AnalyzeResultDb, keywordsDb: SearchKeywordsDb)(
-  implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging {
+class PeriodicProcessing(
+  config: AppConfig,
+  twitterClient: TwitterClient,
+  analyzerClient: AnalyzerClient,
+  resultDb: AnalyzeResultDb,
+  keywordsDb: SearchKeywordsDb
+)(implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging {
 
   def start(): Cancellable = {
     implicit val executor = as.dispatcher
@@ -17,7 +22,7 @@ class PeriodicProcessing(config: AppConfig, resultDb: AnalyzeResultDb, keywordsD
   }
 
   def process(): Unit = {
-    val job = new AnalyzeJob(config)
+    val job = new AnalyzeJob(twitterClient, analyzerClient)
     val res = keywordsDb.getAll().flatMap(keywords => Future.sequence(keywords.map(keyword => job.process(keyword))))
     res.foreach { results =>
       results.foreach { result =>
