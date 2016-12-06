@@ -1,17 +1,13 @@
 package com.xap4o.twony
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import com.xap4o.twony.model.TwitterModel.{SearchMetadata, SearchResponse, Tweet}
+import com.xap4o.twony.processing.{AnalyzeJob, AnalyzeResult, AnalyzerClient}
+import com.xap4o.twony.twitter.TwitterModel.{SearchMetadata, SearchResponse, Tweet}
+import com.xap4o.twony.twitter.{Token, TwitterClient}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.{Await, Future}
 import scala.util.{Success, Try}
 
 class AnalyzeJobTest extends org.scalatest.FunSuite {
-  implicit val system: ActorSystem = ActorSystem("test")
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val executionContext: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
-
   test("Analyze job produces AnalyzeResult") {
     val keyword = "test_keyword"
     val tweets = Seq(Tweet("text1", "user1"), Tweet("text2", "user2"))
@@ -32,7 +28,7 @@ class TestTwitterClient(response: SearchResponse) extends TwitterClient {
 
 
 class TestAnalyzerClient(f: Tweet => Boolean) extends AnalyzerClient {
-  def analyze(tweet: Tweet)(implicit ec: ExecutionContext, as: ActorSystem, m: Materializer): Future[Try[Boolean]] = {
+  def analyze(tweet: Tweet): Future[Try[Boolean]] = {
     Future.successful(Success(f(tweet)))
   }
 }

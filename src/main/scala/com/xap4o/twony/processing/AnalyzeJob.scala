@@ -1,13 +1,13 @@
-package com.xap4o.twony
+package com.xap4o.twony.processing
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
+import com.xap4o.twony.twitter.TwitterClient
+import com.xap4o.twony.utils.Async._
+import com.xap4o.twony.utils.{StrictLogging, Timer}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Success
 
-class AnalyzeJob(twitterClient: TwitterClient, analyzerClient: AnalyzerClient)(
-  implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends StrictLogging {
+class AnalyzeJob(twitterClient: TwitterClient, analyzerClient: AnalyzerClient) extends StrictLogging {
 
   def process(query: String): Future[AnalyzeResult] = {
     val timer = new Timer

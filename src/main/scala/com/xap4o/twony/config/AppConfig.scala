@@ -1,6 +1,7 @@
-package com.xap4o.twony
+package com.xap4o.twony.config
 
 import com.typesafe.config.{Config, ConfigFactory}
+import com.xap4o.twony.utils.Async._
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -18,9 +19,6 @@ case class ProcessingConfig(
 )
 
 object AppConfig {
-  implicit def asFiniteDuration(d: java.time.Duration): FiniteDuration =
-    scala.concurrent.duration.Duration.fromNanos(d.toNanos)
-
   def load(): AppConfig = {
     val c = ConfigFactory.load().getConfig("app")
     val http = c getConfig "http"

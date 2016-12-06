@@ -1,14 +1,15 @@
-package com.xap4o.twony
+package com.xap4o.twony.twitter
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
-import akka.stream.Materializer
+import com.xap4o.twony.config.AppConfig
 import com.xap4o.twony.http.HttpUtils
-import com.xap4o.twony.model.TwitterModel.{AuthResponse, SearchResponse}
+import com.xap4o.twony.twitter.TwitterModel.{AuthResponse, SearchResponse}
+import com.xap4o.twony.utils.Async._
+import com.xap4o.twony.utils.StrictLogging
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 
 
@@ -17,8 +18,7 @@ trait TwitterClient {
   def search(token: Token, keyword: String): Future[SearchResponse]
 }
 
-class TwitterClientImpl(config: AppConfig)(
-  implicit ec: ExecutionContext, as: ActorSystem, m: Materializer) extends TwitterClient with StrictLogging {
+class TwitterClientImpl(config: AppConfig) extends TwitterClient with StrictLogging {
   val contentType = ContentType(MediaType.applicationWithFixedCharset("x-www-form-urlencoded", HttpCharsets.`UTF-8`))
 
   def open(): Future[Token] = {

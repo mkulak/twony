@@ -3,9 +3,9 @@ package com.xap4o.twony.http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.xap4o.twony.StrictLogging
 import com.xap4o.twony.db.SearchKeywordsDb
-import com.xap4o.twony.model.TwitterModel._
+import com.xap4o.twony.twitter.TwitterModel._
+import com.xap4o.twony.utils.StrictLogging
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global

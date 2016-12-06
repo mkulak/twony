@@ -2,8 +2,8 @@ package com.xap4o.twony.http
 
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import com.xap4o.twony.StrictLogging
-import com.xap4o.twony.model.TwitterModel._
+import com.xap4o.twony.twitter.TwitterModel._
+import com.xap4o.twony.utils.StrictLogging
 
 object AnalizerServer extends StrictLogging {
   val route =

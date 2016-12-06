@@ -1,4 +1,4 @@
-package com.xap4o.twony.model
+package com.xap4o.twony.twitter
 
 import java.net.URLEncoder
 import java.util.Base64

@@ -1,24 +1,22 @@
-package com.xap4o.twony
+package com.xap4o.twony.processing
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest}
-import akka.stream.Materializer
-import com.xap4o.twony.Utils._
+import com.xap4o.twony.config.AppConfig
 import com.xap4o.twony.http.HttpUtils
-import com.xap4o.twony.model.TwitterModel.Tweet
+import com.xap4o.twony.twitter.TwitterModel.Tweet
+import com.xap4o.twony.utils.Async._
 import spray.json
 import spray.json._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Try
 
 trait AnalyzerClient {
-  def analyze(tweet: Tweet)(implicit ec: ExecutionContext, as: ActorSystem, m: Materializer): Future[Try[Boolean]]
+  def analyze(tweet: Tweet): Future[Try[Boolean]]
 }
 
 class AnalyzerClientImpl(config: AppConfig) extends AnalyzerClient with json.DefaultJsonProtocol {
-  override def analyze(tweet: Tweet)(
-    implicit ec: ExecutionContext, as: ActorSystem, m: Materializer): Future[Try[Boolean]] = {
+  override def analyze(tweet: Tweet): Future[Try[Boolean]] = {
     val req: HttpRequest = HttpRequest()
       .withUri(s"${config.processing.analyzeHost}/analyze")
       .withMethod(HttpMethods.POST)
