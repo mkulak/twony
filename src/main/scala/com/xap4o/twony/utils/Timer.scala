@@ -1,9 +1,12 @@
 package com.xap4o.twony.utils
 
-class Timer {
-  val start: Long = now()
 
-  def now(): Long = System.currentTimeMillis()
+object Timer {
+  type CreateTimer = () => () => Long
 
-  def duration(): Long = now() - start
+  val system: CreateTimer = () => {
+    def now(): Long = System.currentTimeMillis()
+    val start = now()
+    () => now() - start
+  }
 }

@@ -5,7 +5,7 @@ import com.xap4o.twony.config.AppConfig
 import com.xap4o.twony.db.{AnalyzeResultDb, SearchKeywordsDb}
 import com.xap4o.twony.twitter.TwitterClient
 import com.xap4o.twony.utils.Async._
-import com.xap4o.twony.utils.StrictLogging
+import com.xap4o.twony.utils.{StrictLogging, Timer}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -24,13 +24,13 @@ class PeriodicProcessing(
   }
 
   def process(): Unit = {
-    val job = new AnalyzeJob(twitterClient, analyzerClient)
-    val res = keywordsDb.getAll().flatMap(keywords => Future.sequence(keywords.map(keyword => job.process(keyword))))
-    res.foreach { results =>
-      results.foreach { result =>
-        LOG.info(result.toString)
-        resultDb.persist(result)
-      }
+    val job = new AnalyzeJob(twitterClient, analyzerClient, Timer.system)
+    val resultsFuture = keywordsDb.getAll().flatMap { keywords =>
+      Future.sequence(keywords.map(job.process))
+    }
+    resultsFuture.foreach { results =>
+      results.foreach(resultDb.persist)
+      LOG.info(results.mkString("\n"))
     }
   }
 }
