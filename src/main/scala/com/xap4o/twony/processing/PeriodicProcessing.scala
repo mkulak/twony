@@ -1,7 +1,7 @@
 package com.xap4o.twony.processing
 
 import akka.actor.{ActorSystem, Cancellable}
-import com.xap4o.twony.config.AppConfig
+import com.xap4o.twony.config.ProcessingConfig
 import com.xap4o.twony.db.{AnalyzeResultDb, SearchKeywordsDb}
 import com.xap4o.twony.twitter.TwitterClient
 import com.xap4o.twony.utils.Async._
@@ -11,7 +11,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class PeriodicProcessing(
-  config: AppConfig,
+  config: ProcessingConfig,
   twitterClient: TwitterClient,
   analyzerClient: AnalyzerClient,
   resultDb: AnalyzeResultDb,
@@ -20,7 +20,7 @@ class PeriodicProcessing(
 
   def start(): Cancellable = {
     val task = new Runnable { override def run(): Unit = process()}
-    implicitly[ActorSystem].scheduler.schedule(0.seconds, config.processing.interval, task)
+    implicitly[ActorSystem].scheduler.schedule(0.seconds, config.interval, task)
   }
 
   def process(): Unit = {
