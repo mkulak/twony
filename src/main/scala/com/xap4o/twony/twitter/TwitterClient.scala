@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.Uri.Query
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
 import com.xap4o.twony.config.ProcessingConfig
-import com.xap4o.twony.http.HttpUtils
+import com.xap4o.twony.http.HttpClient
 import com.xap4o.twony.twitter.TwitterModel.{AuthResponse, SearchResponse}
 import com.xap4o.twony.utils.Async._
 import com.xap4o.twony.utils.StrictLogging
@@ -18,7 +18,7 @@ trait TwitterClient {
   def search(token: Token, keyword: String): Future[SearchResponse]
 }
 
-class TwitterClientImpl(config: ProcessingConfig) extends TwitterClient with StrictLogging {
+class TwitterClientImpl(config: ProcessingConfig, http: HttpClient) extends TwitterClient with StrictLogging {
   val contentType = ContentType(MediaType.applicationWithFixedCharset("x-www-form-urlencoded", HttpCharsets.`UTF-8`))
 
   def open(): Future[Token] = {
@@ -28,7 +28,7 @@ class TwitterClientImpl(config: ProcessingConfig) extends TwitterClient with Str
       .withHeaders(Authorization(BasicHttpCredentials(config.twitterKey, config.twitterSecret)))
       .withEntity(HttpEntity(contentType, "grant_type=client_credentials"))
 
-    HttpUtils.getJson(req, config.timeout).map(_.convertTo[AuthResponse].accessToken).map(Token)
+    http.make[AuthResponse](req, config.timeout).map(r => Token(r.accessToken))
   }
 
   def search(token: Token, keyword: String): Future[SearchResponse] = {
@@ -37,7 +37,7 @@ class TwitterClientImpl(config: ProcessingConfig) extends TwitterClient with Str
       .withMethod(HttpMethods.GET)
       .withHeaders(Authorization(OAuth2BearerToken(token.value)))
 
-    HttpUtils.getJson(req, config.timeout).map(_.convertTo[SearchResponse])
+    http.make[SearchResponse](req, config.timeout)
   }
 }
 

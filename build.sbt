@@ -2,7 +2,7 @@ name := "Hello"
 
 scalaVersion := "2.11.8"
 
-val akkaVersion = "2.4.11"
+val akkaVersion = "2.4.14"
 
 libraryDependencies ++= Seq(
   "ch.qos.logback"     %  "logback-classic"                   % "1.1.7",

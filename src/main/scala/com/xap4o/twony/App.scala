@@ -1,12 +1,13 @@
 package com.xap4o.twony
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.xap4o.twony.config.{AppConfig, HttpConfig}
 import com.xap4o.twony.db.{AnalyzeResultDb, Db, SearchKeywordsDb}
-import com.xap4o.twony.http.{AnalizerServer, HttpUtils, KeywordsServer}
+import com.xap4o.twony.http.{AnalizerServer, HttpClientImpl, KeywordsServer}
 import com.xap4o.twony.processing.{AnalyzerClientImpl, PeriodicProcessing}
 import com.xap4o.twony.twitter.TwitterClientImpl
 import com.xap4o.twony.utils.Async._
@@ -25,8 +26,9 @@ object App extends StrictLogging with BasicFormats {
     val db = Database.forConfig(path = "", config.db.fullConfig)
     val resultsDb = new AnalyzeResultDb(db)
     val keywordsDb = new SearchKeywordsDb(db)
-    val twitterClient = new TwitterClientImpl(config.processing)
-    val analyzerClient = new AnalyzerClientImpl(config.processing)
+    val httpClient = new HttpClientImpl()
+    val twitterClient = new TwitterClientImpl(config.processing, httpClient)
+    val analyzerClient = new AnalyzerClientImpl(config.processing, httpClient)
 
     new PeriodicProcessing(config.processing, twitterClient, analyzerClient, resultsDb, keywordsDb).start()
 
@@ -35,7 +37,8 @@ object App extends StrictLogging with BasicFormats {
   }
 
   def startServerAndBlock(config: HttpConfig, route: Route): Unit = {
-    val future: Future[ServerBinding] = HttpUtils.startServer(config, route)
+    val future: Future[ServerBinding] = Http().bindAndHandle(route, config.host, config.port)
+    future.foreach {s => LOG.info(s"Server started at http://${config.host}:${config.port}") }
     LOG.info("Press Enter to terminate")
     StdIn.readLine()
     future.flatMap(_.unbind()).onComplete(_ => implicitly[ActorSystem].terminate())
