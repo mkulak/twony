@@ -7,23 +7,22 @@ import com.xap4o.twony.db.SearchKeywordsDb
 import com.xap4o.twony.twitter.TwitterModel._
 import com.xap4o.twony.utils.StrictLogging
 import spray.json._
-
-import scala.concurrent.ExecutionContext.Implicits.global
+import com.xap4o.twony.utils.Async._
 
 class KeywordsServer(db: SearchKeywordsDb) extends StrictLogging {
   val route: Route =
     path("search_keywords") {
       get {
-        complete(db.getAll().map(v => HttpResponse(entity = HttpEntity(v.toJson.compactPrint))))
+        complete(db.getAll().map(v => HttpResponse(entity = HttpEntity(v.toJson.compactPrint))).runAsync)
       } ~
       post {
         parameters('keyword) { keyword =>
-          complete(db.persist(keyword).map(v => HttpResponse(entity = HttpEntity("done"))))
+          complete(db.persist(keyword).map(v => HttpResponse(entity = HttpEntity("done"))).runAsync)
         }
       } ~
       delete {
         parameters('keyword) { keyword =>
-          complete(db.delete(keyword).map(v => HttpResponse(entity = HttpEntity("deleted"))))
+          complete(db.delete(keyword).map(v => HttpResponse(entity = HttpEntity("deleted"))).runAsync)
         }
       }
     }

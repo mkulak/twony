@@ -2,7 +2,7 @@ name := "Hello"
 
 scalaVersion := "2.11.8"
 
-val akkaVersion = "2.4.14"
+val akkaVersion = "2.4.11"
 
 libraryDependencies ++= Seq(
   "ch.qos.logback"     %  "logback-classic"                   % "1.1.7",
@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"  %% "akka-http-spray-json-experimental" % akkaVersion,
   "com.typesafe.slick" %% "slick"                             % "3.1.1",
   "com.typesafe.slick" %% "slick-hikaricp"                    % "3.1.1",
+  "io.monix"           %% "monix"                             % "2.1.2",
   "org.scalatest"      %% "scalatest"                         % "3.0.1" % "test"
 )
 

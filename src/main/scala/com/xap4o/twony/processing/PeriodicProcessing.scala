@@ -1,14 +1,16 @@
 package com.xap4o.twony.processing
 
-import akka.actor.{ActorSystem, Cancellable}
 import com.xap4o.twony.config.ProcessingConfig
 import com.xap4o.twony.db.{AnalyzeResultDb, SearchKeywordsDb}
 import com.xap4o.twony.twitter.TwitterClient
 import com.xap4o.twony.utils.Async._
 import com.xap4o.twony.utils.{StrictLogging, Timer}
+import monix.eval.Task
+import monix.execution.CancelableFuture
+import monix.reactive.Observable
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 class PeriodicProcessing(
   config: ProcessingConfig,
@@ -18,19 +20,23 @@ class PeriodicProcessing(
   keywordsDb: SearchKeywordsDb
 ) extends StrictLogging {
 
-  def start(): Cancellable = {
-    val task = new Runnable { override def run(): Unit = process()}
-    implicitly[ActorSystem].scheduler.schedule(0.seconds, config.interval, task)
+  def start(): CancelableFuture[Unit] = {
+    Observable.intervalWithFixedDelay(0.seconds, config.interval).map(_ => process()).completedL.runAsync
   }
 
   def process(): Unit = {
     val job = new AnalyzeJob(twitterClient, analyzerClient, Timer.system)
-    val resultsFuture = keywordsDb.getAll().flatMap { keywords =>
-      Future.sequence(keywords.map(job.process))
+    keywordsDb.getAll().flatMap { keywords =>
+      Task.gatherUnordered(keywords.map(job.process))
     }
-    resultsFuture.foreach { results =>
-      results.foreach(resultDb.persist)
-      LOG.info(results.mkString("\n"))
+    .foreach { results =>
+      results.foreach {
+        case Success(res) =>
+          resultDb.persist(res)
+          LOG.info(results.mkString("\n"))
+        case Failure(error) =>
+          LOG.error("Error while processing:" + error)
+      }
     }
   }
 }
