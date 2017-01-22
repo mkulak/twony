@@ -13,9 +13,8 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 class PeriodicProcessing(
+  job: AnalyzeJob,
   config: ProcessingConfig,
-  twitterClient: TwitterClient,
-  analyzerClient: AnalyzerClient,
   resultDb: AnalyzeResultDb,
   keywordsDb: SearchKeywordsDb
 ) extends StrictLogging {
@@ -24,8 +23,7 @@ class PeriodicProcessing(
     Observable.intervalWithFixedDelay(0.seconds, config.interval).map(_ => process()).completedL.runAsync
   }
 
-  def process(): Unit = {
-    val job = new AnalyzeJob(twitterClient, analyzerClient, Timer.system)
+  private def process(): Unit = {
     keywordsDb.getAll().flatMap { keywords =>
       Task.gatherUnordered(keywords.map(job.process))
     }
