@@ -22,6 +22,6 @@ class AnalyzerClientImpl(config: ProcessingConfig, http: HttpClient) extends Ana
       .withMethod(HttpMethods.POST)
       .withEntity(HttpEntity(ContentTypes.`application/json`, tweet.toJson.compactPrint))
 
-    http.make[Boolean](req, config.timeout).materialize
+    http.make[Boolean](req, config.timeout)
   }
 }

@@ -6,6 +6,7 @@ import com.xap4o.twony.utils.Timer.CreateTimer
 import monix.eval.Task
 
 import scala.util.{Success, Try}
+import com.xap4o.twony.utils.MonixSugar._
 
 class AnalyzeJob(
   twitterClient: TwitterClient,
@@ -16,17 +17,18 @@ class AnalyzeJob(
     val timer = createTimer()
     twitterClient
       .open()
-      .flatMap(token => twitterClient.search(token, query))
-      .flatMap { searchResult =>
+      .flatMapTAsync(token => twitterClient.search(token, query))
+      .flatMapTAsync { searchResult =>
         Task.gatherUnordered(searchResult.tweets.map(analyzerClient.analyze)).map { results =>
-          val success = results.collect {case Success(result) => result}
+          val success = results.collect { case Success(result) => result }
           val positiveCount = success.count(identity)
           val negativeCount = success.size - positiveCount
           val errorsCount = results.size - success.size
           val duration = timer()
-          AnalyzeResult(searchResult.metadata.query, results.size, positiveCount, negativeCount, errorsCount, duration)
+          val realQuery = searchResult.metadata.query
+          Success(AnalyzeResult(realQuery, results.size, positiveCount, negativeCount, errorsCount, duration))
         }
-      }.materialize
+      }
   }
 }
 

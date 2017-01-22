@@ -25,11 +25,11 @@ class AnalyzeJobTest extends FunSuite {
 }
 
 class TestTwitterClient(response: SearchResponse) extends TwitterClient {
-  override def open(): Task[Token] = Task.now(Token("test_token"))
+  override def open(): Task[Try[Token]] = Task.now(Success(Token("test_token")))
 
-  override def search(token: Token, keyword: String): Task[SearchResponse] = Task.now(response)
+  override def search(token: Token, keyword: String): Task[Try[SearchResponse]] = Task.now(Success(response))
 
-  override def searchAll(token: Token, keyword: String): Task[SearchResponse] = ???
+  override def searchAll(token: Token, keyword: String): Task[Try[SearchResponse]] = ???
 }
 
 
