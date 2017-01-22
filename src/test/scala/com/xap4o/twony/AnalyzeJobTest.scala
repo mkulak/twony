@@ -28,15 +28,11 @@ class TestTwitterClient(response: SearchResponse) extends TwitterClient {
   override def open(): Task[Try[Token]] = Task.now(Success(Token("test_token")))
 
   override def search(token: Token, keyword: String): Task[Try[SearchResponse]] = Task.now(Success(response))
-
-  override def searchAll(token: Token, keyword: String): Task[Try[SearchResponse]] = ???
 }
 
 
 class TestAnalyzerClient(f: Tweet => Boolean) extends AnalyzerClient {
-  def analyze(tweet: Tweet): Task[Try[Boolean]] = {
-    Task.now(Success(f(tweet)))
-  }
+  def analyze(tweet: Tweet): Task[Try[Boolean]] = Task.now(Success(f(tweet)))
 }
 
 object MockTimer {

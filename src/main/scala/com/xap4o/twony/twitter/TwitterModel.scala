@@ -9,9 +9,6 @@ import spray.json.{JsObject, JsString, JsValue, RootJsonFormat, _}
 
 
 object TwitterModel extends SprayJsonSupport with json.DefaultJsonProtocol {
-  sealed trait Error
-
-  case class AuthError(message: String, t: Throwable) extends Error
 
   case class AuthResponse(tokenType: String, accessToken: String)
   case class SearchResponse(tweets: Seq[Tweet], metadata: SearchMetadata)

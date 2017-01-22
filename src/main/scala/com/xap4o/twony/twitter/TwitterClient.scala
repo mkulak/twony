@@ -17,7 +17,6 @@ import com.xap4o.twony.utils.MonixSugar._
 trait TwitterClient {
   def open(): Task[Try[Token]]
   def search(token: Token, keyword: String): Task[Try[SearchResponse]]
-  def searchAll(token: Token, keyword: String): Task[Try[SearchResponse]]
 }
 
 class TwitterClientImpl(config: ProcessingConfig, http: HttpClient) extends TwitterClient with StrictLogging {
@@ -41,8 +40,6 @@ class TwitterClientImpl(config: ProcessingConfig, http: HttpClient) extends Twit
 
     http.make[SearchResponse](req, config.timeout)
   }
-
-  override def searchAll(token: Token, keyword: String): Task[Try[SearchResponse]] = ???
 }
 
 case class Token(value: String)
