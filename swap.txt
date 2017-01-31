@@ -7,7 +7,7 @@
 
 rest crud api to manage search keywords list
 
-Test AnalyzeJob (preferrably with akka http test client
+Test AnalyzeJob (preferably with akka http test client
 Test KeywordsServer (CRUD)
 
 //  test("Invoking head on an empty Set should produce NoSuchElementException") {

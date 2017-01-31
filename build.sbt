@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"  %% "akka-http-spray-json-experimental" % akkaVersion,
   "com.typesafe.slick" %% "slick"                             % "3.1.1",
   "com.typesafe.slick" %% "slick-hikaricp"                    % "3.1.1",
-  "io.monix"           %% "monix"                             % "2.1.2",
+  "io.reactivex"       %% "rxscala"                           % "0.26.5",
   "org.scalatest"      %% "scalatest"                         % "3.0.1" % "test"
 )
 

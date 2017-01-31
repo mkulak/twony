@@ -1,32 +1,33 @@
 package com.xap4o.twony.processing
 
 import com.xap4o.twony.twitter.TwitterClient
-import com.xap4o.twony.utils.StrictLogging
+import com.xap4o.twony.utils.{Async, StrictLogging}
 import com.xap4o.twony.utils.Timer.CreateTimer
-import monix.eval.Task
 
 import scala.util.{Success, Try}
-import com.xap4o.twony.utils.MonixSugar._
+import rx.lang.scala.Observable
+
+import Async._
 
 class AnalyzeJob(
   twitterClient: TwitterClient,
   analyzerClient: AnalyzerClient,
   createTimer: CreateTimer) extends StrictLogging {
 
-  def process(query: String): Task[Try[AnalyzeResult]] = {
+  def process(query: String): Observable[Try[AnalyzeResult]] = {
     val timer = createTimer()
     twitterClient
       .open()
-      .flatMapTAsync(token => twitterClient.search(token, query))
-      .flatMapTAsync { searchResult =>
-        Task.gatherUnordered(searchResult.tweets.map(analyzerClient.analyze)).map { results =>
+      .rightFlatMapAsync(token => twitterClient.search(token, query))
+      .rightFlatMapAsync { searchResult =>
+        Async.sequence(searchResult.tweets.map(analyzerClient.analyze)).flatMap { results =>
           val success = results.collect { case Success(result) => result }
           val positiveCount = success.count(identity)
           val negativeCount = success.size - positiveCount
           val errorsCount = results.size - success.size
           val duration = timer()
           val realQuery = searchResult.metadata.query
-          Success(AnalyzeResult(realQuery, results.size, positiveCount, negativeCount, errorsCount, duration))
+          lift(AnalyzeResult(realQuery, results.size, positiveCount, negativeCount, errorsCount, duration))
         }
       }
   }
