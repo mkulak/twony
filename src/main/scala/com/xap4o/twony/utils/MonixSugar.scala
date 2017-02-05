@@ -4,6 +4,7 @@ import monix.eval.Task
 import monix.execution.Scheduler
 import monix.reactive.Observable
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 object MonixSugar {
@@ -31,5 +32,9 @@ object MonixSugar {
       case Success(a) => f(a)
       case Failure(e) => Observable(Failure(e))
     }
+  }
+  
+  implicit class FutureOps[A](f: Future[A]) {
+    def toTask: Task[A] = Task.fromFuture(f)
   }
 }
