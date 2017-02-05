@@ -5,13 +5,14 @@ import com.xap4o.twony.db.{AnalyzeResultDb, SearchKeywordsDb}
 import com.xap4o.twony.twitter.TwitterClient
 import com.xap4o.twony.utils.Async._
 import com.xap4o.twony.utils.{StrictLogging, Timer}
-import monix.eval.Task
-import monix.execution.CancelableFuture
-import monix.reactive.Observable
+import fs2.Task
+import fs2.Stream
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-import com.xap4o.twony.utils.MonixSugar._
+import com.xap4o.twony.utils.Fs2Sugar._
+
+import scala.concurrent.Future
 
 class PeriodicProcessing(
   job: AnalyzeJob,
@@ -20,20 +21,23 @@ class PeriodicProcessing(
   keywordsDb: SearchKeywordsDb
 ) extends StrictLogging {
 
-  def start(): CancelableFuture[Unit] = {
-    Observable.intervalWithFixedDelay(0.seconds, config.interval).map(_ => process()).completedL.runAsync
+  def start(): Future[Unit] = {
+    process().scheduleWithFixedDelay(config.interval).run.unsafeRunAsyncFuture()
   }
 
-  private def process(): Unit = {
-    keywordsDb.getAll().toObservable.rightFlatMap { keywords =>
-      sequence(keywords.map(k => job.process(k)))
-    }
-    .foreach {
-      case Success(res) =>
-        resultDb.persist(res)
-        LOG.info(res.toString)
-      case Failure(error) =>
-        LOG.error("Error while processing:", error)
-    }
+  private def process(): Task[Unit] = {
+    Stream.eval(keywordsDb.getAll())
+      .rightFlatMap { keywords =>
+        sequence(keywords.map(k => job.process(k)))
+      }
+      .evalMap {
+        case Success(res) =>
+          LOG.info(res.toString)
+          resultDb.persist(res).map(Success.apply)
+        case Failure(error) =>
+          LOG.error("Error while processing:", error)
+          Task.now(Failure(error))
+      }
+      .run
   }
 }

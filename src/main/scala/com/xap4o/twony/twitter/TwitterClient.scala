@@ -7,10 +7,10 @@ import com.xap4o.twony.config.ProcessingConfig
 import com.xap4o.twony.http.HttpClient
 import com.xap4o.twony.twitter.TwitterModel.{AuthResponse, SearchResponse}
 import com.xap4o.twony.utils.StrictLogging
-import monix.eval.Task
+import fs2.Task
 
 import scala.util.Try
-import com.xap4o.twony.utils.MonixSugar._
+import com.xap4o.twony.utils.Fs2Sugar._
 
 
 

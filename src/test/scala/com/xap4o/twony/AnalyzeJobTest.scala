@@ -4,7 +4,7 @@ import com.xap4o.twony.twitter.TwitterModel.{SearchMetadata, SearchResponse, Twe
 import com.xap4o.twony.twitter.{Token, TwitterClient}
 import com.xap4o.twony.utils.Async._
 import com.xap4o.twony.utils.Timer.CreateTimer
-import monix.eval.Task
+import fs2.Task
 import org.scalatest.FunSuite
 
 import scala.concurrent.Await
@@ -19,7 +19,7 @@ class AnalyzeJobTest extends FunSuite {
     val twitterClient = new TestTwitterClient(searchResponse)
     val analyzerClient = new TestAnalyzerClient(_.text == "text1")
     val job = new AnalyzeJob(twitterClient, analyzerClient, MockTimer.zero)
-    val result = Await.result(job.process(keyword).runAsync, 10 seconds)
+    val result = Await.result(job.process(keyword).unsafeRunAsyncFuture(), 10 seconds)
     assertResult(Success(AnalyzeResult(keyword, 2, 1, 1, 0, 0)))(result)
   }
 }

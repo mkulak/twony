@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequ
 import com.xap4o.twony.config.ProcessingConfig
 import com.xap4o.twony.http.HttpClient
 import com.xap4o.twony.twitter.TwitterModel.Tweet
-import monix.eval.Task
+import fs2.Task
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
