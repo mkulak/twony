@@ -11,6 +11,7 @@ import monix.reactive.Observable
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+import com.xap4o.twony.utils.MonixSugar._
 
 class PeriodicProcessing(
   job: AnalyzeJob,
@@ -24,17 +25,15 @@ class PeriodicProcessing(
   }
 
   private def process(): Unit = {
-    keywordsDb.getAll().flatMap { keywords =>
-      Task.gatherUnordered(keywords.map(job.process))
+    keywordsDb.getAll().toObservable.rightFlatMap { keywords =>
+      sequence(keywords.map(k => job.process(k)))
     }
-    .foreach { results =>
-      results.foreach {
-        case Success(res) =>
-          resultDb.persist(res)
-          LOG.info(results.mkString("\n"))
-        case Failure(error) =>
-          LOG.error("Error while processing:" + error)
-      }
+    .foreach {
+      case Success(res) =>
+        resultDb.persist(res)
+        LOG.info(res.toString)
+      case Failure(error) =>
+        LOG.error("Error while processing:", error)
     }
   }
 }

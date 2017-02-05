@@ -8,6 +8,7 @@ import slick.driver.PostgresDriver.api._
 import slick.jdbc.JdbcBackend.DatabaseDef
 
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 object Db {
   def init(config: DbConfig): Unit = {
@@ -25,16 +26,16 @@ class AnalyzeResultDb(db: DatabaseDef)(implicit ec: ExecutionContext) {
 }
 
 class SearchKeywordsDb(db: DatabaseDef)(implicit ec: ExecutionContext) {
-  def getAll(): Task[Seq[String]] = {
-    Task.fromFuture(db.run(sql"""select value from search_keywords order by id""".as[String]))
+  def getAll(): Task[Try[Seq[String]]] = {
+    Task.fromFuture(db.run(sql"""select value from search_keyword order by id""".as[String])).materialize
   }
 
-  def persist(keyword: String): Task[Int] = {
-    Task.fromFuture(db.run(sqlu"""insert into search_keywords(value) values ($keyword)"""))
+  def persist(keyword: String): Task[Try[Int]] = {
+    Task.fromFuture(db.run(sqlu"""insert into search_keyword(value) values ($keyword)""")).materialize
   }
 
-  def delete(keyword: String): Task[Int] = {
-    Task.fromFuture(db.run(sqlu"""delete from search_keywords where value=$keyword"""))
+  def delete(keyword: String): Task[Try[Int]] = {
+    Task.fromFuture(db.run(sqlu"""delete from search_keyword where value=$keyword""")).materialize
   }
 }
 

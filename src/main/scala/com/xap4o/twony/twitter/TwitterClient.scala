@@ -29,7 +29,7 @@ class TwitterClientImpl(config: ProcessingConfig, http: HttpClient) extends Twit
       .withHeaders(Authorization(BasicHttpCredentials(config.twitterKey, config.twitterSecret)))
       .withEntity(HttpEntity(contentType, "grant_type=client_credentials"))
 
-    http.make[AuthResponse](req, config.timeout).mapT(r => Token(r.accessToken))
+    http.make[AuthResponse](req, config.timeout).rightMap(r => Token(r.accessToken))
   }
 
   def search(token: Token, keyword: String): Task[Try[SearchResponse]] = {

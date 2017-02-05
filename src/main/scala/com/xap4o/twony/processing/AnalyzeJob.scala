@@ -17,8 +17,8 @@ class AnalyzeJob(
     val timer = createTimer()
     twitterClient
       .open()
-      .flatMapTAsync(token => twitterClient.search(token, query))
-      .flatMapTAsync { searchResult =>
+      .rightFlatMap(token => twitterClient.search(token, query))
+      .rightFlatMap { searchResult =>
         Task.gatherUnordered(searchResult.tweets.map(analyzerClient.analyze)).map { results =>
           val success = results.collect { case Success(result) => result }
           val positiveCount = success.count(identity)

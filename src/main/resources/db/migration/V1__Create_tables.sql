@@ -9,7 +9,7 @@ CREATE TABLE analyze_result (
   PRIMARY KEY(id)
 );
 
-CREATE TABLE search_keywords (
+CREATE TABLE search_keyword (
   id SERIAL,
   value VARCHAR(50) NOT NULL,
 
@@ -17,4 +17,5 @@ CREATE TABLE search_keywords (
   UNIQUE (value)
 );
 
-INSERT INTO search_keywords(value) VALUES('trump')
+INSERT INTO search_keyword(value) VALUES('trump')
+INSERT INTO search_keyword(value) VALUES('scala')

@@ -13,7 +13,7 @@ class KeywordsServer(db: SearchKeywordsDb) extends StrictLogging {
   val route: Route =
     path("search_keywords") {
       get {
-        complete(db.getAll().map(v => HttpResponse(entity = HttpEntity(v.toJson.compactPrint))).runAsync)
+        complete(db.getAll().map(v => HttpResponse(entity = HttpEntity(v.getOrElse(Seq.empty).toJson.compactPrint))).runAsync)
       } ~
       post {
         parameters('keyword) { keyword =>
