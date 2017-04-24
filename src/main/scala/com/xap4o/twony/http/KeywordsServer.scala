@@ -13,16 +13,16 @@ class KeywordsServer(db: SearchKeywordsDb) extends StrictLogging {
   val route: Route =
     path("search_keywords") {
       get {
-        complete(db.getAll().map(v => HttpResponse(entity = HttpEntity(v.getOrElse(Seq.empty).toJson.compactPrint))).unsafeRunAsyncFuture())
+        complete(db.getAll().map(v => HttpResponse(entity = HttpEntity(v.getOrElse(Seq.empty).toJson.compactPrint))))
       } ~
       post {
         parameters('keyword) { keyword =>
-          complete(db.persist(keyword).map(v => HttpResponse(entity = HttpEntity("done"))).unsafeRunAsyncFuture())
+          complete(db.persist(keyword).map(v => HttpResponse(entity = HttpEntity("done"))))
         }
       } ~
       delete {
         parameters('keyword) { keyword =>
-          complete(db.delete(keyword).map(v => HttpResponse(entity = HttpEntity("deleted"))).unsafeRunAsyncFuture())
+          complete(db.delete(keyword).map(v => HttpResponse(entity = HttpEntity("deleted"))))
         }
       }
     }

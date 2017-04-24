@@ -7,22 +7,23 @@ import com.xap4o.twony.config.ProcessingConfig
 import com.xap4o.twony.http.HttpClient
 import com.xap4o.twony.twitter.TwitterModel.{AuthResponse, SearchResponse}
 import com.xap4o.twony.utils.StrictLogging
-import fs2.Task
 
 import scala.util.Try
-import com.xap4o.twony.utils.Fs2Sugar._
+import com.xap4o.twony.utils.AkkaSugar._
+
+import scala.concurrent.Future
 
 
 
 trait TwitterClient {
-  def open(): Task[Try[Token]]
-  def search(token: Token, keyword: String): Task[Try[SearchResponse]]
+  def open(): Future[Try[Token]]
+  def search(token: Token, keyword: String): Future[Try[SearchResponse]]
 }
 
 class TwitterClientImpl(config: ProcessingConfig, http: HttpClient) extends TwitterClient with StrictLogging {
   val contentType = ContentType(MediaType.applicationWithFixedCharset("x-www-form-urlencoded", HttpCharsets.`UTF-8`))
 
-  def open(): Task[Try[Token]] = {
+  def open(): Future[Try[Token]] = {
     val req: HttpRequest = HttpRequest()
       .withUri(s"${config.twitterHost}/oauth2/token")
       .withMethod(HttpMethods.POST)
@@ -32,7 +33,7 @@ class TwitterClientImpl(config: ProcessingConfig, http: HttpClient) extends Twit
     http.make[AuthResponse](req, config.timeout).rightMap(r => Token(r.accessToken))
   }
 
-  def search(token: Token, keyword: String): Task[Try[SearchResponse]] = {
+  def search(token: Token, keyword: String): Future[Try[SearchResponse]] = {
     val req: HttpRequest = HttpRequest()
       .withUri(Uri(s"${config.twitterHost}/1.1/search/tweets.json").withQuery(Query("q" -> keyword)))
       .withMethod(HttpMethods.GET)

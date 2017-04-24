@@ -1,3 +1,25 @@
+fs2:
+* Stream has additional generic parameter (Task)
+* Library code is very hard to read b/c of generic overuse:
+  def ++[G[_],Lub[_],O2>:O](s2: => Stream[G,O2])(implicit R: RealSupertype[O,O2], L: Lub1[F,G,Lub]): Stream[Lub,O2] =
+  def evalMap[G[_],Lub[_],O2](f: O => G[O2])(implicit L: Lub1[F,G,Lub]): Stream[Lub,O2] =
+
+* Idea can't infer types in some places due to very complex generic params
+(good code red w/o switching off type aware highlight, cant't show type of expression when using sequence etc)
+* Scaladocs sucks (Task.parallelTraverse)
+
+rxscala:
+* Feels very imperative
+* Lacking Task analog
+
+Random thoughts:
+* Try seems way cooler than Either[CustomError, Result]
+** Handles thrown exceptions as well as "normal" errors
+** No need to do this: Either.catchNonFatal{...}.leftMap(CustomError.fromThrowable)
+** Gives you line numbers
+** Much shorter
+
+
 * get search keywords list from db
 * for each keyword
 ** search tweets

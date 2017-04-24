@@ -13,12 +13,11 @@ import com.xap4o.twony.twitter.TwitterClientImpl
 import com.xap4o.twony.utils.Async._
 import com.xap4o.twony.utils.{StrictLogging, Timer}
 import slick.jdbc.JdbcBackend._
-import spray.json.BasicFormats
 
 import scala.concurrent.Future
 import scala.io.StdIn
 
-object App extends StrictLogging with BasicFormats {
+object App extends StrictLogging {
   def main(args: Array[String]): Unit = {
     val config = AppConfig.load()
     Db.init(config.db)
